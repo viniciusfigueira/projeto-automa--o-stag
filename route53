@@ -1,0 +1,23 @@
+import * as pulumi from "@pulumi/pulumi";
+import * as aws from "@pulumi/aws";
+
+const myEc2Instance = new aws.ec2.Instance("my-ec2-instance", {
+    ami: "ami-123456",
+    instanceType: "t2.micro",
+    deleteBeforeReplace: true,
+    tags: {
+        Name: "My EC2 instance"
+    }
+});
+
+const myRecord = new aws.route53.Record("my-record", {
+    name: "mydomain.com",
+    type: "A",
+    zoneId: "ZONE_ID",
+    aliases: [{
+        name: myEc2Instance.publicDns,
+        zoneId: myEc2Instance.availabilityZone,
+        evaluateTargetHealth: true
+    }],
+    overwrite: true
+});
